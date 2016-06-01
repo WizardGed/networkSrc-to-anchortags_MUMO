@@ -42,27 +42,27 @@ from mumo_module import (commaSeperatedIntegers,
                          MumoModule)
 
 from datetime import timedelta
-import urllib, base64, re
+import urllib, re
 
 
 class urltoimg(MumoModule):
-    default_config = {'urltoimg':(
+    default_config = {'networkurltoanchor':(
                                 ('servers', commaSeperatedIntegers, []),
-                                ('keyword', str, '!kuva')
+                                ('keyword', str, '!nuta')
                                 )
                     }
     
     def __init__(self, name, manager, configuration = None):
         MumoModule.__init__(self, name, manager, configuration)
         self.murmur = manager.getMurmurModule()
-        self.keyword = self.cfg().urltoimg.keyword
+        self.keyword = self.cfg().networkurltoanchor.keyword
 
     def connected(self):
         manager = self.manager()
         log = self.log()
         log.debug("Register for Server callbacks")
         
-        servers = self.cfg().urltoimg.servers
+        servers = self.cfg().networkurltoanchor.servers
         if not servers:
             servers = manager.SERVERS_ALL
             
@@ -79,9 +79,13 @@ class urltoimg(MumoModule):
     def userTextMessage(self, server, user, message, current=None):
         if message.text.startswith(self.keyword):            
             msg = message.text[len(self.keyword):].strip()
-            link = re.findall(r'href=[\'"]?([^\'" >]+)', msg)
-            msg = '<a href="' + str(link) + '">' + str(link) + '</a>'
-            self.sendMessage(server, user, message, msg)
+            ImgTag = re.search('src="([^"]+)"',msg)
+            link = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', msg)
+            if ImgTag:
+                msg = '<a href="' + str(link) + '">' + str(link) + '</a>'
+                self.sendMessage(server, user, message, msg)
+            else:
+                self.sendMessage(server, user, message, msg)
             return
 
 
