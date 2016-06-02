@@ -42,10 +42,10 @@ from mumo_module import (commaSeperatedIntegers,
                          MumoModule)
 
 from datetime import timedelta
-import urllib, re
+import re
 
 
-class urltoimg(MumoModule):
+class networkurltoanchor(MumoModule):
     default_config = {'networkurltoanchor':(
                                 ('servers', commaSeperatedIntegers, []),
                                 ('keyword', str, '!nuta')
@@ -79,14 +79,17 @@ class urltoimg(MumoModule):
     def userTextMessage(self, server, user, message, current=None):
         if message.text.startswith(self.keyword):            
             msg = message.text[len(self.keyword):].strip()
-            ImgTag = re.search('src="([^"]+)"',msg)
-            link = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', msg)
-            if ImgTag:
-                msg = '<a href="' + str(link) + '">' + str(link) + '</a>'
-                self.sendMessage(server, user, message, msg)
-            else:
-                self.sendMessage(server, user, message, msg)
-            return
+        else:
+            msg = message.text
+
+        ImgTag = re.search('src="([^"]+)"',msg)
+        link = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', msg)
+        if ImgTag:
+            msg = '<a href="' + str(link) + '">' + str(link) + '</a>'
+            self.sendMessage(server, user, message, msg)
+        else:
+            self.sendMessage(server, user, message, msg)
+        return
 
 
             
